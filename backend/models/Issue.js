@@ -25,6 +25,11 @@ const issueSchema = new mongoose.Schema({
         type: String,
         enum: ['Minor', 'Moderate', 'Major', 'Critical'],
         default: 'Moderate'
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
 }, {
     timestamps: true

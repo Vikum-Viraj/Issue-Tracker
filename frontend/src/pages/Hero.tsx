@@ -30,7 +30,7 @@ const Hero = () => {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
-                onClick={() => navigate('/manage-issues')}
+                onClick={() => navigate('/all-issues')}
                 className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg"
               >
                 Manage Issues →

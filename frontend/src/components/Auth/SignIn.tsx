@@ -36,7 +36,7 @@ const SignIn = () => {
         window.dispatchEvent(new Event('authChange'))
         
         // Navigate to manage issues page
-        navigate('/manage-issues')
+        navigate('/all-issues')
       } else {
         setError(result.message || 'Login failed')
       }

@@ -4,7 +4,7 @@ const PublicRoute = ({ children }) => {
   const token = sessionStorage.getItem('token')
   
   if (token) {
-    return <Navigate to="/manage-issues" replace />
+    return <Navigate to="/all-issues" replace />
   }
 
   return children

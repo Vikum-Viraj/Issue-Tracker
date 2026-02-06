@@ -1,9 +1,11 @@
 import Issue from "../models/Issue.js";
+import User from "../models/User.js";
 
 // Create a new issue
 export const createIssue = async (req, res) => {
     try {
         const { title, description, status, priority, severity } = req.body;
+        const userId = req.user.id; // From authMiddleware
 
         // Validation
         if (!title || !description) {
@@ -18,10 +20,18 @@ export const createIssue = async (req, res) => {
             description,
             status: status || 'Open',
             priority: priority || 'Medium',
-            severity: severity || 'Moderate'
+            severity: severity || 'Moderate',
+            user: userId
         });
 
         await newIssue.save();
+
+        // Add issue to user's issues array
+        await User.findByIdAndUpdate(
+            userId,
+            { $push: { issues: newIssue._id } },
+            { new: true }
+        );
 
         res.status(201).json({
             success: true,
@@ -122,6 +132,29 @@ export const getIssueById = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to fetch issue",
+            error: error.message
+        });
+    }
+};
+
+// Get all issues for the logged-in user
+export const getUserIssues = async (req, res) => {
+    try {
+        const userId = req.user.id; // From authMiddleware
+
+        const issues = await Issue.find({ user: userId }).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            message: "User issues retrieved successfully",
+            count: issues.length,
+            data: issues
+        });
+    } catch (error) {
+        console.error("Error fetching user issues:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch user issues",
             error: error.message
         });
     }

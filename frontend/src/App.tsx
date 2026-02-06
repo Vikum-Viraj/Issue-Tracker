@@ -2,11 +2,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import Navbar from './components/Navbar'
 import Hero from './pages/Hero'
-import ManageIssue from './pages/ManageIssue'
 import SignIn from './components/Auth/SignIn'
 import SignUp from './components/Auth/SignUp'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
+import AllIssues from './pages/AllIssues'
 
 function App() {
   return (
@@ -15,10 +15,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Hero />} />
         <Route 
-          path="/manage-issues" 
+          path="/all-issues" 
           element={
             <ProtectedRoute>
-              <ManageIssue />
+              <AllIssues />
             </ProtectedRoute>
           } 
         />
