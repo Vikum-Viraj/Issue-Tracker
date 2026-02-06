@@ -7,6 +7,7 @@ import SignUp from './components/Auth/SignUp'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
 import AllIssues from './pages/AllIssues'
+import MyIssues from './pages/MyIssues'
 
 function App() {
   return (
@@ -19,6 +20,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AllIssues />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/my-issues" 
+          element={
+            <ProtectedRoute>
+              <MyIssues />
             </ProtectedRoute>
           } 
         />

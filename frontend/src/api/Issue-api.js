@@ -64,5 +64,18 @@ export const issueAPI = {
         message: error.response?.data?.message || 'Failed to fetch user issues'
       }
     }
+  },
+
+  // Delete issue
+  deleteIssue: async (id) => {
+    try {
+      const response = await axiosClient.delete(`/issues/delete/${id}`)
+      return { success: true, data: response.data }
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete issue'
+      }
+    }
   }
 }

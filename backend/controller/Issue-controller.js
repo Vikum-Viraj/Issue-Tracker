@@ -159,3 +159,49 @@ export const getUserIssues = async (req, res) => {
         });
     }
 };
+
+// Delete an issue
+export const deleteIssue = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id; // From authMiddleware
+
+        // Check if issue exists
+        const issue = await Issue.findById(id);
+        if (!issue) {
+            return res.status(404).json({
+                success: false,
+                message: "Issue not found"
+            });
+        }
+
+        // Check if user owns the issue
+        if (issue.user.toString() !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to delete this issue"
+            });
+        }
+
+        await Issue.findByIdAndDelete(id);
+
+        // Remove issue from user's issues array
+        await User.findByIdAndUpdate(
+            userId,
+            { $pull: { issues: id } },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Issue deleted successfully"
+        });
+    } catch (error) {
+        console.error("Error deleting issue:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete issue",
+            error: error.message
+        });
+    }
+};
