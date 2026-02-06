@@ -1,6 +1,8 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Hero = () => {
+  const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}
@@ -28,13 +30,10 @@ const Hero = () => {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
-                onClick={() => window.location.href = '#manage-issues'}
+                onClick={() => navigate('/manage-issues')}
                 className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg"
               >
                 Manage Issues →
-              </button>
-              <button className="px-8 py-4 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition border-2 border-gray-200 font-semibold text-lg">
-                Learn More
               </button>
             </div>
 

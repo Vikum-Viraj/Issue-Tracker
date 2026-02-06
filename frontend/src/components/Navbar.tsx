@@ -17,13 +17,13 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="flex items-center space-x-4">
-            <a href="#manage-issues" className="text-gray-700 hover:text-blue-600 font-medium transition">
+            <a href="manage-issues" className="text-gray-700 hover:text-blue-600 font-medium transition">
               Manage Issues
             </a>
-            <a href="#signin" className="text-gray-700 hover:text-blue-600 font-medium transition">
+            <a href="signin" className="text-gray-700 hover:text-blue-600 font-medium transition">
               Sign In
             </a>
-            <a href="#signup" className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+            <a href="signup" className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
               Sign Up
             </a>
           </div>
