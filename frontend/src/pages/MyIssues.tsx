@@ -5,8 +5,7 @@ import { issueAPI } from '../api/Issue-api.ts';
 import ViewIssue from '../components/ViewIssue';
 import UpdateIssue from '../components/UpdateIssue';
 import CreateIssue from '../components/CreateIssue';
-import Pagination from '../components/Pagination';
-
+import Pagination from '../components/Pagination';import ConfirmDialog from '../components/ConfirmDialog';
 interface Issue {
   _id: string;
   title: string;
@@ -33,6 +32,19 @@ const MyIssues = () => {
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [priorityFilter, setPriorityFilter] = useState<string>('All');
   const [severityFilter, setSeverityFilter] = useState<string>('All');
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type: 'danger' | 'warning' | 'info' | 'success';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    type: 'warning'
+  });
   const itemsPerPage = 4;
 
   useEffect(() => {
@@ -62,47 +74,61 @@ const MyIssues = () => {
   };
 
   const handleDelete = async (issueId: string) => {
-    if (!window.confirm('Are you sure you want to delete this issue?')) {
-      return;
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Issue',
+      message: 'Are you sure you want to delete this issue? This action cannot be undone.',
+      type: 'danger',
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        setDeletingId(issueId);
+        const result = await issueAPI.deleteIssue(issueId);
 
-    setDeletingId(issueId);
-    const result = await issueAPI.deleteIssue(issueId);
-
-    if (result.success) {
-      toast.success('Issue deleted successfully! 🗑️');
-      // Refresh the issues list
-      fetchMyIssues();
-    } else {
-      setError(result.message || 'Failed to delete issue');
-    }
-    setDeletingId(null);
+        if (result.success) {
+          toast.success('Issue deleted successfully! 🗑️');
+          fetchMyIssues();
+        } else {
+          setError(result.message || 'Failed to delete issue');
+        }
+        setDeletingId(null);
+      }
+    });
   };
 
   const handleStatusChange = async (issueId: string, newStatus: 'Resolved' | 'Closed', currentIssue: Issue) => {
-    const confirmMessage = newStatus === 'Resolved' 
-      ? 'Are you sure you want to mark this issue as Resolved?'
-      : 'Are you sure you want to mark this issue as Closed? This action will close the issue.';
-    
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
+    const dialogConfig = newStatus === 'Resolved' 
+      ? {
+          title: 'Mark as Resolved',
+          message: 'Are you sure you want to mark this issue as Resolved? This indicates the issue has been successfully addressed.',
+          type: 'success' as const
+        }
+      : {
+          title: 'Close Issue',
+          message: 'Are you sure you want to close this issue? Closed issues are considered complete and archived.',
+          type: 'warning' as const
+        };
 
-    setDeletingId(issueId); // Reusing the loading state
-    const result = await issueAPI.updateIssue(issueId, {
-      ...currentIssue,
-      status: newStatus
+    setConfirmDialog({
+      isOpen: true,
+      ...dialogConfig,
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        setDeletingId(issueId);
+        const result = await issueAPI.updateIssue(issueId, {
+          ...currentIssue,
+          status: newStatus
+        });
+
+        if (result.success) {
+          toast.success(`Issue marked as ${newStatus}! ✅`);
+          fetchMyIssues();
+        } else {
+          setError(result.message || 'Failed to update issue status');
+          toast.error(result.message || 'Failed to update issue status');
+        }
+        setDeletingId(null);
+      }
     });
-
-    if (result.success) {
-      toast.success(`Issue marked as ${newStatus}! ✅`);
-      // Refresh the issues list
-      fetchMyIssues();
-    } else {
-      setError(result.message || 'Failed to update issue status');
-      toast.error(result.message || 'Failed to update issue status');
-    }
-    setDeletingId(null);
   };
 
   // Filter issues based on search and filters - optimized with useMemo
@@ -639,6 +665,18 @@ const MyIssues = () => {
             onCreate={fetchMyIssues}
           />
         )}
+
+        {/* Confirm Dialog */}
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          type={confirmDialog.type}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+          confirmText="Confirm"
+          cancelText="Cancel"
+        />
       </div>
     </div>
   );
