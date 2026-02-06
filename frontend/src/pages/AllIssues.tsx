@@ -4,17 +4,17 @@ import { issueAPI } from '../api/Issue-api.ts';
 import ViewIssue from '../components/ViewIssue';
 import CreateIssue from '../components/CreateIssue';
 import Pagination from '../components/Pagination';
-
-interface Issue {
-  _id: string;
-  title: string;
-  description: string;
-  status: 'Open' | 'In Progress' | 'Resolved' | 'Closed';
-  priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  severity: 'Minor' | 'Moderate' | 'Major' | 'Critical';
-  createdAt: string;
-  updatedAt: string;
-}
+import StatusCards from '../components/StatusCards';
+import SearchFilters from '../components/SearchFilters';
+import type { Issue } from '../types/issue.types';
+import { 
+  getStatusBadge, 
+  getPriorityBadge, 
+  getSeverityIcon, 
+  formatDate, 
+  calculateStatusCounts,
+  filterIssues 
+} from '../utils/issueHelpers';
 
 const AllIssues = () => {
   const navigate = useNavigate();
@@ -59,82 +59,11 @@ const AllIssues = () => {
 
   // Filter issues based on search and filters - optimized with useMemo
   const filteredIssues = useMemo(() => {
-    return issues.filter(issue => {
-      // Search filter
-      const matchesSearch = debouncedSearchTerm === '' || 
-        issue.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        issue.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-      
-      // Status filter
-      const matchesStatus = statusFilter === 'All' || issue.status === statusFilter;
-      
-      // Priority filter
-      const matchesPriority = priorityFilter === 'All' || issue.priority === priorityFilter;
-      
-      // Severity filter
-      const matchesSeverity = severityFilter === 'All' || issue.severity === severityFilter;
-      
-      return matchesSearch && matchesStatus && matchesPriority && matchesSeverity;
-    });
+    return filterIssues(issues, debouncedSearchTerm, statusFilter, priorityFilter, severityFilter);
   }, [issues, debouncedSearchTerm, statusFilter, priorityFilter, severityFilter]);
 
   // Calculate status counts from all issues
-  const statusCounts = {
-    Open: issues.filter(issue => issue.status === 'Open').length,
-    'In Progress': issues.filter(issue => issue.status === 'In Progress').length,
-    Resolved: issues.filter(issue => issue.status === 'Resolved').length,
-    Closed: issues.filter(issue => issue.status === 'Closed').length,
-    Total: issues.length
-  };
-
-  // Status badge styling
-  const getStatusBadge = (status: string) => {
-    const styles = {
-      'Open': 'bg-blue-100 text-blue-800 border-blue-300',
-      'In Progress': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      'Resolved': 'bg-green-100 text-green-800 border-green-300',
-      'Closed': 'bg-gray-100 text-gray-800 border-gray-300'
-    };
-    return styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800';
-  };
-
-  // Priority badge styling
-  const getPriorityBadge = (priority: string) => {
-    const styles = {
-      'Low': 'bg-slate-50 text-slate-700 border-slate-300',
-      'Medium': 'bg-blue-50 text-blue-700 border-blue-300',
-      'High': 'bg-orange-50 text-orange-700 border-orange-300',
-      'Critical': 'bg-red-50 text-red-700 border-red-300'
-    };
-    return styles[priority as keyof typeof styles] || 'bg-gray-100 text-gray-800';
-  };
-
-  // Severity icon
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case 'Minor':
-        return '';
-      case 'Moderate':
-        return '';
-      case 'Major':
-        return '';
-      case 'Critical':
-        return '';
-      default:
-        return '';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const statusCounts = useMemo(() => calculateStatusCounts(issues), [issues]);
 
   // Pagination logic - using filtered issues
   const totalPages = Math.ceil(filteredIssues.length / itemsPerPage);
@@ -192,185 +121,23 @@ const AllIssues = () => {
         </div>
 
         {/* Status Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          {/* Total Issues */}
-          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-indigo-100 text-sm font-medium mb-1">Total Issues</p>
-                <p className="text-4xl font-bold">{statusCounts.Total}</p>
-              </div>
-              <div className="bg-white bg-opacity-20 rounded-full p-3">
-                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                  <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Open Issues */}
-          <div className="bg-white rounded-xl shadow-lg border-2 border-blue-200 p-6 transform hover:scale-105 transition-transform duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-600 text-sm font-semibold mb-1">Open</p>
-                <p className="text-4xl font-bold text-blue-700">{statusCounts.Open}</p>
-              </div>
-              <div className="bg-blue-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* In Progress Issues */}
-          <div className="bg-white rounded-xl shadow-lg border-2 border-yellow-200 p-6 transform hover:scale-105 transition-transform duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-yellow-600 text-sm font-semibold mb-1">In Progress</p>
-                <p className="text-4xl font-bold text-yellow-700">{statusCounts['In Progress']}</p>
-              </div>
-              <div className="bg-yellow-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Resolved Issues */}
-          <div className="bg-white rounded-xl shadow-lg border-2 border-green-200 p-6 transform hover:scale-105 transition-transform duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-600 text-sm font-semibold mb-1">Resolved</p>
-                <p className="text-4xl font-bold text-green-700">{statusCounts.Resolved}</p>
-              </div>
-              <div className="bg-green-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Closed Issues */}
-          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-6 transform hover:scale-105 transition-transform duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-semibold mb-1">Closed</p>
-                <p className="text-4xl font-bold text-gray-700">{statusCounts.Closed}</p>
-              </div>
-              <div className="bg-gray-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatusCards statusCounts={statusCounts} />
 
         {/* Search and Filter Section */}
         {!loading && !error && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Search Input */}
-              <div className="flex-1">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search issues by title or description..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                  />
-                  {searchTerm && (
-                    <button
-                      onClick={() => setSearchTerm('')}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Status Filter */}
-              <div className="w-full lg:w-48">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white"
-                >
-                  <option value="All">All Status</option>
-                  <option value="Open">Open</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Resolved">Resolved</option>
-                  <option value="Closed">Closed</option>
-                </select>
-              </div>
-
-              {/* Priority Filter */}
-              <div className="w-full lg:w-48">
-                <select
-                  value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white"
-                >
-                  <option value="All">All Priorities</option>
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                  <option value="Critical">Critical</option>
-                </select>
-              </div>
-
-              {/* Severity Filter */}
-              <div className="w-full lg:w-48">
-                <select
-                  value={severityFilter}
-                  onChange={(e) => setSeverityFilter(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white"
-                >
-                  <option value="All">All Severities</option>
-                  <option value="Minor">Minor</option>
-                  <option value="Moderate">Moderate</option>
-                  <option value="Major">Major</option>
-                  <option value="Critical">Critical</option>
-                </select>
-              </div>
-
-              {/* Clear Filters Button */}
-              {(searchTerm || statusFilter !== 'All' || priorityFilter !== 'All' || severityFilter !== 'All') && (
-                <button
-                  onClick={clearFilters}
-                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-medium flex items-center gap-2 whitespace-nowrap"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Clear
-                </button>
-              )}
-            </div>
-
-            {/* Filter Results Info */}
-            {filteredIssues.length !== issues.length && (
-              <div className="mt-4 flex items-center text-sm text-gray-600">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Showing {filteredIssues.length} of {issues.length} issues
-              </div>
-            )}
-          </div>
+          <SearchFilters
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            priorityFilter={priorityFilter}
+            setPriorityFilter={setPriorityFilter}
+            severityFilter={severityFilter}
+            setSeverityFilter={setSeverityFilter}
+            clearFilters={clearFilters}
+            filteredCount={filteredIssues.length}
+            totalCount={issues.length}
+          />
         )}
 
         {/* Loading State */}
