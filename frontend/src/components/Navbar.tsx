@@ -1,16 +1,47 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
-import { logout } from '../store/authSlice'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 
 const Navbar = () => {
   const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const isAuthenticated = useSelector((state: any) => state.auth.isAuthenticated)
-  const user = useSelector((state: any) => state.auth.user)
+  const location = useLocation()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState(null)
+
+  const checkAuth = () => {
+    const token = sessionStorage.getItem('token')
+    const userData = sessionStorage.getItem('user')
+    
+    if (token && userData) {
+      setIsAuthenticated(true)
+      setUser(JSON.parse(userData))
+    } else {
+      setIsAuthenticated(false)
+      setUser(null)
+    }
+  }
+
+  useEffect(() => {
+    checkAuth()
+    
+    // Listen for custom auth events
+    window.addEventListener('authChange', checkAuth)
+    
+    return () => {
+      window.removeEventListener('authChange', checkAuth)
+    }
+  }, [])
+
+  // Check auth on route changes
+  useEffect(() => {
+    checkAuth()
+  }, [location])
 
   const handleLogout = () => {
-    dispatch(logout())
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
+    setIsAuthenticated(false)
+    setUser(null)
+    window.dispatchEvent(new Event('authChange'))
     navigate('/signin')
   }
 
@@ -32,11 +63,8 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <Link to="/manage-issues" className="text-gray-700 hover:text-blue-600 font-medium transition">
-                  Manage Issues
-                </Link>
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-lg text-gray-600">
                     Welcome, {user?.name}
                   </span>
                   <button

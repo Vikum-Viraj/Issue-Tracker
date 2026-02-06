@@ -1,6 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { Provider } from 'react-redux'
-import { store } from './store/store'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import Navbar from './components/Navbar'
 import Hero from './pages/Hero'
@@ -8,27 +6,40 @@ import ManageIssue from './pages/ManageIssue'
 import SignIn from './components/Auth/SignIn'
 import SignUp from './components/Auth/SignUp'
 import ProtectedRoute from './components/ProtectedRoute'
+import PublicRoute from './components/PublicRoute'
 
 function App() {
   return (
-    <Provider store={store}>
-      <Router>
-        <Navbar/>
-        <Routes>
-          <Route path="/" element={<Hero />} />
-          <Route 
-            path="/manage-issues" 
-            element={
-              <ProtectedRoute>
-                <ManageIssue />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-        </Routes>
-      </Router>
-    </Provider>
+    <Router>
+      <Navbar/>
+      <Routes>
+        <Route path="/" element={<Hero />} />
+        <Route 
+          path="/manage-issues" 
+          element={
+            <ProtectedRoute>
+              <ManageIssue />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/signin" 
+          element={
+            <PublicRoute>
+              <SignIn />
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/signup" 
+          element={
+            <PublicRoute>
+              <SignUp />
+            </PublicRoute>
+          } 
+        />
+      </Routes>
+    </Router>
   )
 }
 

@@ -1,12 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { setCredentials } from '../../store/authSlice'
 import { authAPI } from '../../api/auth-api'
 
 const SignUp = () => {
   const navigate = useNavigate()
-  const dispatch = useDispatch()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,11 +46,12 @@ const SignUp = () => {
       })
 
       if (result.success) {
-        // Update Redux store (auto-login after registration)
-        dispatch(setCredentials({
-          user: result.data,
-          token: result.data.token
-        }))
+        // Store token in sessionStorage (auto-login after registration)
+        sessionStorage.setItem('token', result.data.token)
+        sessionStorage.setItem('user', JSON.stringify(result.data))
+        
+        // Trigger auth change event
+        window.dispatchEvent(new Event('authChange'))
         
         // Navigate to manage issues page
         navigate('/manage-issues')
