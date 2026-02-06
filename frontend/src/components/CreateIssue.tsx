@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { issueAPI } from '../api/Issue-api';
 
 interface CreateIssueProps {
@@ -25,6 +26,7 @@ const CreateIssue: React.FC<CreateIssueProps> = ({ onClose, onCreate }) => {
     const result = await issueAPI.createIssue(formData);
     
     if (result.success) {
+      toast.success('Issue created successfully! 🎉');
       onCreate();
       onClose();
     } else {

@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 
-const PublicRoute = ({ children }) => {
+const PublicRoute = ({ children }: { children: React.ReactNode }  ) => {
   const token = sessionStorage.getItem('token')
   
   if (token) {

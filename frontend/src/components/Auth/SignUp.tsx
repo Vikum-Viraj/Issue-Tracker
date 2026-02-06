@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { authAPI } from '../../api/auth-api'
 
 const SignUp = () => {
@@ -52,6 +53,8 @@ const SignUp = () => {
         
         // Trigger auth change event
         window.dispatchEvent(new Event('authChange'))
+        
+        toast.success('Account created successfully! Welcome! 🎉')
         
         // Navigate to manage issues page
         navigate('/all-issues')

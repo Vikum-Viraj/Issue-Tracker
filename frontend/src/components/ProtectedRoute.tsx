@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = sessionStorage.getItem('token')
   
   if (!token) {

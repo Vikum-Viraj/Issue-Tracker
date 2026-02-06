@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { issueAPI } from '../api/Issue-api';
 
 interface Issue {
@@ -49,6 +50,7 @@ const UpdateIssue: React.FC<UpdateIssueProps> = ({ issue, onClose, onUpdate }) =
     const result = await issueAPI.updateIssue(issue._id, formData);
     
     if (result.success) {
+      toast.success('Issue updated successfully! ✨');
       onUpdate();
       onClose();
     } else {

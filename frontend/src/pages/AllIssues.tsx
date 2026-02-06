@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { issueAPI } from '../api/Issue-api';
 import ViewIssue from '../components/ViewIssue';
@@ -24,11 +24,25 @@ const AllIssues = () => {
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [priorityFilter, setPriorityFilter] = useState<string>('All');
+  const [severityFilter, setSeverityFilter] = useState<string>('All');
   const itemsPerPage = 4;
 
   useEffect(() => {
     fetchAllIssues();
   }, []);
+
+  // Debounce search term to optimize performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const fetchAllIssues = async () => {
     setLoading(true);
@@ -43,7 +57,28 @@ const AllIssues = () => {
     setLoading(false);
   };
 
-  // Calculate status counts
+  // Filter issues based on search and filters - optimized with useMemo
+  const filteredIssues = useMemo(() => {
+    return issues.filter(issue => {
+      // Search filter
+      const matchesSearch = debouncedSearchTerm === '' || 
+        issue.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        issue.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      
+      // Status filter
+      const matchesStatus = statusFilter === 'All' || issue.status === statusFilter;
+      
+      // Priority filter
+      const matchesPriority = priorityFilter === 'All' || issue.priority === priorityFilter;
+      
+      // Severity filter
+      const matchesSeverity = severityFilter === 'All' || issue.severity === severityFilter;
+      
+      return matchesSearch && matchesStatus && matchesPriority && matchesSeverity;
+    });
+  }, [issues, debouncedSearchTerm, statusFilter, priorityFilter, severityFilter]);
+
+  // Calculate status counts from all issues
   const statusCounts = {
     Open: issues.filter(issue => issue.status === 'Open').length,
     'In Progress': issues.filter(issue => issue.status === 'In Progress').length,
@@ -101,16 +136,29 @@ const AllIssues = () => {
     });
   };
 
-  // Pagination logic
-  const totalPages = Math.ceil(issues.length / itemsPerPage);
+  // Pagination logic - using filtered issues
+  const totalPages = Math.ceil(filteredIssues.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentIssues = issues.slice(indexOfFirstItem, indexOfLastItem);
+  const currentIssues = filteredIssues.slice(indexOfFirstItem, indexOfLastItem);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, statusFilter, priorityFilter, severityFilter]);
+
+  // Clear all filters
+  const clearFilters = useCallback(() => {
+    setSearchTerm('');
+    setStatusFilter('All');
+    setPriorityFilter('All');
+    setSeverityFilter('All');
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
@@ -222,6 +270,109 @@ const AllIssues = () => {
           </div>
         </div>
 
+        {/* Search and Filter Section */}
+        {!loading && !error && (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-8">
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search Input */}
+              <div className="flex-1">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search issues by title or description..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Status Filter */}
+              <div className="w-full lg:w-48">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white"
+                >
+                  <option value="All">All Status</option>
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
+                </select>
+              </div>
+
+              {/* Priority Filter */}
+              <div className="w-full lg:w-48">
+                <select
+                  value={priorityFilter}
+                  onChange={(e) => setPriorityFilter(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white"
+                >
+                  <option value="All">All Priorities</option>
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+
+              {/* Severity Filter */}
+              <div className="w-full lg:w-48">
+                <select
+                  value={severityFilter}
+                  onChange={(e) => setSeverityFilter(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white"
+                >
+                  <option value="All">All Severities</option>
+                  <option value="Minor">Minor</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Major">Major</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+
+              {/* Clear Filters Button */}
+              {(searchTerm || statusFilter !== 'All' || priorityFilter !== 'All' || severityFilter !== 'All') && (
+                <button
+                  onClick={clearFilters}
+                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-medium flex items-center gap-2 whitespace-nowrap"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {/* Filter Results Info */}
+            {filteredIssues.length !== issues.length && (
+              <div className="mt-4 flex items-center text-sm text-gray-600">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Showing {filteredIssues.length} of {issues.length} issues
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center items-center py-20">
@@ -250,19 +401,33 @@ const AllIssues = () => {
         {/* Issues List */}
         {!loading && !error && (
           <>
-            {issues.length === 0 ? (
+            {filteredIssues.length === 0 ? (
               <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-16 text-center">
                 <svg className="mx-auto w-20 h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">No Issues Found</h3>
-                <p className="text-gray-500">There are no issues to display at this time.</p>
+                <p className="text-gray-500">
+                  {issues.length === 0 
+                    ? 'There are no issues to display at this time.' 
+                    : 'No issues match your current filters. Try adjusting your search or filters.'}
+                </p>
+                {issues.length > 0 && (
+                  <button
+                    onClick={clearFilters}
+                    className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all"
+                  >
+                    Clear Filters
+                  </button>
+                )}
               </div>
             ) : (
               <div className="space-y-5">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-800">
-                    All Issues ({issues.length})
+                    {filteredIssues.length === issues.length 
+                      ? `All Issues (${issues.length})`
+                      : `Filtered Issues (${filteredIssues.length}/${issues.length})`}
                   </h2>
                 </div>
 
@@ -337,7 +502,7 @@ const AllIssues = () => {
         )}
 
         {/* Pagination */}
-        {!loading && !error && issues.length > 0 && (
+        {!loading && !error && filteredIssues.length > 0 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
