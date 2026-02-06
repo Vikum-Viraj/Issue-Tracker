@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { authAPI } from '../../api/auth-api'
 
 const SignUp = () => {
   const navigate = useNavigate()
@@ -38,29 +39,21 @@ const SignUp = () => {
     setLoading(true)
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password
-        })
+      const result = await authAPI.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
       })
 
-      const data = await response.json()
-
-      if (data.success) {
-        // Store token in localStorage (auto-login after registration)
-        localStorage.setItem('token', data.data.token)
-        localStorage.setItem('user', JSON.stringify(data.data))
+      if (result.success) {
+        // Store token in sessionStorage (auto-login after registration)
+        sessionStorage.setItem('token', result.data.token)
+        sessionStorage.setItem('user', JSON.stringify(result.data))
         
         // Navigate to manage issues page
         navigate('/manage-issues')
       } else {
-        setError(data.message || 'Registration failed')
+        setError(result.message || 'Registration failed')
       }
     } catch (err) {
       setError('Something went wrong. Please try again.')

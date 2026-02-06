@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { authAPI } from '../../api/auth-api'
 
 const SignIn = () => {
   const navigate = useNavigate()
@@ -24,25 +25,17 @@ const SignIn = () => {
     setLoading(true)
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      })
+      const result = await authAPI.login(formData)
 
-      const data = await response.json()
-
-      if (data.success) {
-        // Store token in localStorage
-        localStorage.setItem('token', data.data.token)
-        localStorage.setItem('user', JSON.stringify(data.data))
+      if (result.success) {
+        // Store token in sessionStorage
+        sessionStorage.setItem('token', result.data.token)
+        sessionStorage.setItem('user', JSON.stringify(result.data))
         
         // Navigate to manage issues page
         navigate('/manage-issues')
       } else {
-        setError(data.message || 'Login failed')
+        setError(result.message || 'Login failed')
       }
     } catch (err) {
       setError('Something went wrong. Please try again.')
