@@ -79,6 +79,32 @@ const MyIssues = () => {
     setDeletingId(null);
   };
 
+  const handleStatusChange = async (issueId: string, newStatus: 'Resolved' | 'Closed', currentIssue: Issue) => {
+    const confirmMessage = newStatus === 'Resolved' 
+      ? 'Are you sure you want to mark this issue as Resolved?'
+      : 'Are you sure you want to mark this issue as Closed? This action will close the issue.';
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    setDeletingId(issueId); // Reusing the loading state
+    const result = await issueAPI.updateIssue(issueId, {
+      ...currentIssue,
+      status: newStatus
+    });
+
+    if (result.success) {
+      toast.success(`Issue marked as ${newStatus}! ✅`);
+      // Refresh the issues list
+      fetchMyIssues();
+    } else {
+      setError(result.message || 'Failed to update issue status');
+      toast.error(result.message || 'Failed to update issue status');
+    }
+    setDeletingId(null);
+  };
+
   // Filter issues based on search and filters - optimized with useMemo
   const filteredIssues = useMemo(() => {
     return issues.filter(issue => {
@@ -504,6 +530,34 @@ const MyIssues = () => {
                           </svg>
                           {formatDate(issue.createdAt)}
                         </div>
+
+                        {/* Quick Status Actions */}
+                        {issue.status !== 'Resolved' && issue.status !== 'Closed' && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleStatusChange(issue._id, 'Resolved', issue)}
+                              disabled={deletingId === issue._id}
+                              className="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 text-xs font-semibold rounded-lg hover:bg-green-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Mark as Resolved"
+                            >
+                              <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Resolve
+                            </button>
+                            <button
+                              onClick={() => handleStatusChange(issue._id, 'Closed', issue)}
+                              disabled={deletingId === issue._id}
+                              className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Mark as Closed"
+                            >
+                              <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                              Close
+                            </button>
+                          </div>
+                        )}
 
                         <div className="flex gap-2">
                           <button
