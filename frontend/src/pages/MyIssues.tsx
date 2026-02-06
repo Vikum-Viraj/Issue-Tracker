@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { issueAPI } from '../api/Issue-api';
 import ViewIssue from '../components/ViewIssue';
 import UpdateIssue from '../components/UpdateIssue';
+import CreateIssue from '../components/CreateIssue';
+import Pagination from '../components/Pagination';
 
 interface Issue {
   _id: string;
@@ -23,6 +25,9 @@ const MyIssues = () => {
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingIssue, setEditingIssue] = useState<Issue | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     fetchMyIssues();
@@ -116,14 +121,36 @@ const MyIssues = () => {
     });
   };
 
+  // Pagination logic
+  const totalPages = Math.ceil(issues.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentIssues = issues.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">My Issues</h1>
-            <p className="text-gray-600 text-lg">Issues created and managed by you</p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">My Issues</h1>
+              <p className="text-gray-600 text-lg">Issues created and managed by you</p>
+            </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center px-4 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110"
+              title="Create New Issue"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
           </div>
           <button
             onClick={() => navigate('/all-issues')}
@@ -259,7 +286,7 @@ const MyIssues = () => {
                   </h2>
                 </div>
 
-                {issues.map((issue) => (
+                {currentIssues.map((issue) => (
                   <div
                     key={issue._id}
                     className="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-xl hover:border-purple-300 transition-all duration-300"
@@ -358,6 +385,15 @@ const MyIssues = () => {
           </>
         )}
 
+        {/* Pagination */}
+        {!loading && !error && issues.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
+
         {/* View Issue Modal */}
         {selectedIssueId && (
           <ViewIssue 
@@ -372,6 +408,14 @@ const MyIssues = () => {
             issue={editingIssue}
             onClose={() => setEditingIssue(null)}
             onUpdate={fetchMyIssues}
+          />
+        )}
+
+        {/* Create Issue Modal */}
+        {showCreateModal && (
+          <CreateIssue
+            onClose={() => setShowCreateModal(false)}
+            onCreate={fetchMyIssues}
           />
         )}
       </div>

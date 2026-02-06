@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { issueAPI } from '../api/Issue-api';
 import ViewIssue from '../components/ViewIssue';
+import CreateIssue from '../components/CreateIssue';
+import Pagination from '../components/Pagination';
 
 interface Issue {
   _id: string;
@@ -20,6 +22,9 @@ const AllIssues = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     fetchAllIssues();
@@ -96,6 +101,17 @@ const AllIssues = () => {
     });
   };
 
+  // Pagination logic
+  const totalPages = Math.ceil(issues.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentIssues = issues.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -105,15 +121,26 @@ const AllIssues = () => {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">All Issues</h1>
             <p className="text-gray-600 text-lg">Complete overview of all tracked issues</p>
           </div>
-          <button
-            onClick={() => navigate('/my-issues')}
-            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-lg font-bold rounded-xl hover:from-indigo-700 hover:to-indigo-800 shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            My Issues
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center px-4 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-full hover:from-indigo-700 hover:to-indigo-800 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110"
+              title="Create New Issue"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+            <button
+              onClick={() => navigate('/my-issues')}
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-lg font-bold rounded-xl hover:from-indigo-700 hover:to-indigo-800 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              My Issues
+            </button>
+          </div>
         </div>
 
         {/* Status Cards */}
@@ -239,7 +266,7 @@ const AllIssues = () => {
                   </h2>
                 </div>
 
-                {issues.map((issue) => (
+                {currentIssues.map((issue) => (
                   <div
                     key={issue._id}
                     className="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-xl hover:border-indigo-300 transition-all duration-300"
@@ -309,11 +336,28 @@ const AllIssues = () => {
           </>
         )}
 
+        {/* Pagination */}
+        {!loading && !error && issues.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
+
         {/* View Issue Modal */}
         {selectedIssueId && (
           <ViewIssue 
             issueId={selectedIssueId} 
             onClose={() => setSelectedIssueId(null)} 
+          />
+        )}
+
+        {/* Create Issue Modal */}
+        {showCreateModal && (
+          <CreateIssue
+            onClose={() => setShowCreateModal(false)}
+            onCreate={fetchAllIssues}
           />
         )}
       </div>
