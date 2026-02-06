@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { authAPI } from '../../api/auth-api'
+import { authAPI } from '../../api/auth-api.ts'
 
 const SignIn = () => {
   const navigate = useNavigate()
@@ -28,7 +28,7 @@ const SignIn = () => {
     try {
       const result = await authAPI.login(formData)
 
-      if (result.success) {
+      if (result.success && result.data) {
         // Store token in sessionStorage
         sessionStorage.setItem('token', result.data.token)
         sessionStorage.setItem('user', JSON.stringify(result.data))
@@ -41,10 +41,14 @@ const SignIn = () => {
         // Navigate to manage issues page
         navigate('/all-issues')
       } else {
-        setError(result.message || 'Login failed')
+        const errorMsg = result.message || 'Login failed'
+        setError(errorMsg)
+        toast.error(errorMsg)
       }
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      const errorMsg = 'Something went wrong. Please try again.'
+      setError(errorMsg)
+      toast.error(errorMsg)
       console.error('Login error:', err)
     } finally {
       setLoading(false)

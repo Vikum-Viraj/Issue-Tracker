@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  token?: string;
+}
+
 const Navbar = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<User | null>(null)
 
   const checkAuth = () => {
     const token = sessionStorage.getItem('token')
     const userData = sessionStorage.getItem('user')
-    
+
     if (token && userData) {
       setIsAuthenticated(true)
       setUser(JSON.parse(userData))
@@ -22,10 +29,10 @@ const Navbar = () => {
 
   useEffect(() => {
     checkAuth()
-    
+
     // Listen for custom auth events
     window.addEventListener('authChange', checkAuth)
-    
+
     return () => {
       window.removeEventListener('authChange', checkAuth)
     }
@@ -63,10 +70,13 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <div className="flex items-center space-x-3">
-                  <span className="text-lg text-gray-600">
-                    Welcome, {user?.name}
-                  </span>
+                <div className="flex items-center space-x-7">
+                  <div className='flex gap-2'>
+                    <span className='text-lg text-gray-600'>Welcome</span>
+                    <span className="text-lg text-gray-900">
+                      {user?.name && user.name.charAt(0).toUpperCase() + user.name.slice(1)}!
+                    </span>
+                  </div>
                   <button
                     onClick={handleLogout}
                     className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"

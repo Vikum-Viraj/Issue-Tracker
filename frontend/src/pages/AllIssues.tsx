@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { issueAPI } from '../api/Issue-api';
+import { issueAPI } from '../api/Issue-api.ts';
 import ViewIssue from '../components/ViewIssue';
 import CreateIssue from '../components/CreateIssue';
 import Pagination from '../components/Pagination';
@@ -49,7 +49,7 @@ const AllIssues = () => {
     setError('');
     const result = await issueAPI.getAllIssues();
     
-    if (result.success) {
+    if (result.success && result.data) {
       setIssues(result.data);
     } else {
       setError(result.message || 'Failed to fetch issues');

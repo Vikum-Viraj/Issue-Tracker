@@ -42,7 +42,7 @@ const Hero = () => {
         </div>
 
         {/* Features Section */}
-        <div className="mt-32 px-4 md:px-8 lg:px-12">
+        <div className="mt-16 px-4 md:px-8 lg:px-12">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">All Features</h2>
             <p className="text-xl text-gray-600">Everything you need to manage issues effectively</p>

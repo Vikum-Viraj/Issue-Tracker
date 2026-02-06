@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { issueAPI } from '../api/Issue-api';
+import { issueAPI } from '../api/Issue-api.ts';
 
 interface Issue {
   _id: string;
@@ -33,7 +33,7 @@ const ViewIssue: React.FC<ViewIssueProps> = ({ issueId, onClose }) => {
     setError('');
     const result = await issueAPI.getIssueById(issueId!);
     
-    if (result.success) {
+    if (result.success && result.data) {
       setIssue(result.data);
     } else {
       setError(result.message || 'Failed to fetch issue details');

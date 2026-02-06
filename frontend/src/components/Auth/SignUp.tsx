@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { authAPI } from '../../api/auth-api'
+import { authAPI } from '../../api/auth-api.ts'
 
 const SignUp = () => {
   const navigate = useNavigate()
@@ -46,7 +46,7 @@ const SignUp = () => {
         password: formData.password
       })
 
-      if (result.success) {
+      if (result.success && result.data) {
         // Store token in sessionStorage (auto-login after registration)
         sessionStorage.setItem('token', result.data.token)
         sessionStorage.setItem('user', JSON.stringify(result.data))
@@ -59,10 +59,14 @@ const SignUp = () => {
         // Navigate to manage issues page
         navigate('/all-issues')
       } else {
-        setError(result.message || 'Registration failed')
+        const errorMsg = result.message || 'Registration failed'
+        setError(errorMsg)
+        toast.error(errorMsg)
       }
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      const errorMsg = 'Something went wrong. Please try again.'
+      setError(errorMsg)
+      toast.error(errorMsg)
       console.error('Registration error:', err)
     } finally {
       setLoading(false)

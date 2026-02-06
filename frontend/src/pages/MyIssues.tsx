@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { issueAPI } from '../api/Issue-api';
+import { issueAPI } from '../api/Issue-api.ts';
 import ViewIssue from '../components/ViewIssue';
 import UpdateIssue from '../components/UpdateIssue';
 import CreateIssue from '../components/CreateIssue';
@@ -53,7 +53,7 @@ const MyIssues = () => {
     setError('');
     const result = await issueAPI.getUserIssues();
 
-    if (result.success) {
+    if (result.success && result.data) {
       setIssues(result.data);
     } else {
       setError(result.message || 'Failed to fetch your issues');
