@@ -15,7 +15,7 @@ import {
   calculateStatusCounts,
   filterIssues 
 } from '../utils/issueHelpers';
-import StatusCards from '../components/ui/StatusCards.tsx';
+import StatusCards from '../components/view/StatusCards.tsx';
 import CreateIssue from '../components/form/CreateIssue.tsx';
 
 const AllIssues = () => {

@@ -1,5 +1,6 @@
 import React from 'react';
-import type { StatusCounts } from '../types/issue.types';
+import type { StatusCounts } from '../../types/issue.types';
+
 
 interface StatusCardsProps {
   statusCounts: StatusCounts;

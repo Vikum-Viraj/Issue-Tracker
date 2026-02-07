@@ -7,7 +7,7 @@ import UpdateIssue from '../components/form/UpdateIssue';
 import CreateIssue from '../components/form/CreateIssue';
 import Pagination from '../components/Pagination';
 import ConfirmDialog from '../components/ui/ConfirmDialog.tsx';
-import StatusCards from '../components/ui/StatusCards';
+import StatusCards from '../components/view/StatusCards.tsx';
 import SearchFilters from '../components/filter/SearchFilters.tsx';
 import type { Issue } from '../types/issue.types';
 import { 
