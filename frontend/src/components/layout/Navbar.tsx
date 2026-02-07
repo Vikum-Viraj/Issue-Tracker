@@ -30,7 +30,7 @@ const Navbar = () => {
   useEffect(() => {
     checkAuth()
 
-    // Listen for custom auth events
+    // Listen for custom auth  events
     window.addEventListener('authChange', checkAuth)
 
     return () => {
