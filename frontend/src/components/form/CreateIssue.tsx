@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { issueAPI } from '../api/Issue-api.ts';
+import { issueAPI } from '../../api/Issue-api.ts';
+
 
 interface CreateIssueProps {
   onClose: () => void;

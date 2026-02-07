@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { issueAPI } from '../api/Issue-api.ts';
+import { issueAPI } from '../../api/Issue-api';
+
 
 interface Issue {
   _id: string;

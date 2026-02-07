@@ -1,11 +1,11 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { issueAPI } from '../api/Issue-api.ts';
-import ViewIssue from '../components/ViewIssue';
-import CreateIssue from '../components/CreateIssue';
+import ViewIssue from '../components/view/ViewIssue.tsx';
+
 import Pagination from '../components/Pagination';
-import StatusCards from '../components/StatusCards';
-import SearchFilters from '../components/SearchFilters';
+
+import SearchFilters from '../components/filter/SearchFilters.tsx';
 import type { Issue } from '../types/issue.types';
 import { 
   getStatusBadge, 
@@ -15,6 +15,8 @@ import {
   calculateStatusCounts,
   filterIssues 
 } from '../utils/issueHelpers';
+import StatusCards from '../components/ui/StatusCards.tsx';
+import CreateIssue from '../components/form/CreateIssue.tsx';
 
 const AllIssues = () => {
   const navigate = useNavigate();

@@ -2,13 +2,13 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { issueAPI } from '../api/Issue-api.ts';
-import ViewIssue from '../components/ViewIssue';
-import UpdateIssue from '../components/UpdateIssue';
-import CreateIssue from '../components/CreateIssue';
+import ViewIssue from '../components/view/ViewIssue.tsx';
+import UpdateIssue from '../components/form/UpdateIssue';
+import CreateIssue from '../components/form/CreateIssue';
 import Pagination from '../components/Pagination';
-import ConfirmDialog from '../components/ConfirmDialog';
-import StatusCards from '../components/StatusCards';
-import SearchFilters from '../components/SearchFilters';
+import ConfirmDialog from '../components/ui/ConfirmDialog.tsx';
+import StatusCards from '../components/ui/StatusCards';
+import SearchFilters from '../components/filter/SearchFilters.tsx';
 import type { Issue } from '../types/issue.types';
 import { 
   getStatusBadge, 
