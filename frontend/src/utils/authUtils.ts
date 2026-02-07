@@ -1,4 +1,4 @@
-import { store } from '../store/store'
+import { store } from '../store/store.ts'
 
 export const getAuthToken = (): string | null => {
   const state = store.getState()

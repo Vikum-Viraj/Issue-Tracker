@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { getAuthToken } from '../utils/authUtils'
-import { store } from '../store/store'
-import { logout } from '../store/authSlice'
+import { store } from '../store/store.ts'
+import { logout } from '../store/authSlice.ts'
 
 // create an axios client instance
 const axiosClient = axios.create({
