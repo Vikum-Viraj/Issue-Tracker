@@ -5,7 +5,7 @@ import { logout } from '../store/authSlice.ts'
 
 // create an axios client instance
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json'
   }

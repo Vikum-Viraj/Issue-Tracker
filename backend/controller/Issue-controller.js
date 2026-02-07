@@ -26,13 +26,6 @@ export const createIssue = async (req, res) => {
 
         await newIssue.save();
 
-        // Add issue to user's issues array
-        await User.findByIdAndUpdate(
-            userId,
-            { $push: { issues: newIssue._id } },
-            { new: true }
-        );
-
         res.status(201).json({
             success: true,
             message: "Issue created successfully",
@@ -184,13 +177,6 @@ export const deleteIssue = async (req, res) => {
         }
 
         await Issue.findByIdAndDelete(id);
-
-        // Remove issue from user's issues array
-        await User.findByIdAndUpdate(
-            userId,
-            { $pull: { issues: id } },
-            { new: true }
-        );
 
         res.status(200).json({
             success: true,
