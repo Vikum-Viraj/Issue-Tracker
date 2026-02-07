@@ -88,9 +88,6 @@ const SignUp = () => {
           <h2 className="mt-4 text-2xl font-bold text-gray-900">
             Create Account
           </h2>
-          <p className="mt-1 text-sm text-gray-600">
-            Join us to start managing your issues
-          </p>
         </div>
 
         {/* Sign Up Form */}
@@ -103,7 +100,6 @@ const SignUp = () => {
               </div>
             )}
 
-            {/* Name Field */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name
@@ -204,12 +200,6 @@ const SignUp = () => {
           </div>
         </div>
 
-        {/* Back to Home */}
-        <div className="text-center">
-          <Link to="/" className="text-sm text-gray-600 hover:text-gray-900 transition">
-            ← Back to Home
-          </Link>
-        </div>
       </div>
     </div>
   )

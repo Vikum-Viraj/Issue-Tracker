@@ -151,13 +151,6 @@ const SignIn = () => {
             </p>
           </div>
         </div>
-
-        {/* Back to Home */}
-        <div className="text-center">
-          <Link to="/" className="text-sm text-gray-600 hover:text-gray-900 transition">
-            ← Back to Home
-          </Link>
-        </div>
       </div>
     </div>
   )
