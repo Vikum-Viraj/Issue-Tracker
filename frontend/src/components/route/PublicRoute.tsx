@@ -1,9 +1,10 @@
 import { Navigate } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
 
 const PublicRoute = ({ children }: { children: React.ReactNode }  ) => {
-  const token = sessionStorage.getItem('token')
+  const { isAuthenticated } = useAuth()
   
-  if (token) {
+  if (isAuthenticated) {
     return <Navigate to="/all-issues" replace />
   }
 

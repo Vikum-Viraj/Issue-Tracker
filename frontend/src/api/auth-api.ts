@@ -58,7 +58,9 @@ export const authAPI = {
 
   // Logout user
   logout: (): void => {
-    sessionStorage.removeItem('token')
-    sessionStorage.removeItem('user')
+    // Note: This method is now deprecated - use Redux logout action instead
+    // Keeping for backward compatibility, but components should use:
+    // const dispatch = useDispatch()
+    // dispatch(logout())
   }
 }

@@ -1,4 +1,7 @@
 import axios from 'axios'
+import { getAuthToken } from '../utils/authUtils'
+import { store } from '../store/store'
+import { logout } from '../store/authSlice'
 
 // create an axios client instance
 const axiosClient = axios.create({
@@ -11,7 +14,7 @@ const axiosClient = axios.create({
 // Request interceptor to add token
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem('token')
+    const token = getAuthToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -27,8 +30,7 @@ axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      sessionStorage.removeItem('token')
-      sessionStorage.removeItem('user')
+      store.dispatch(logout())
       window.location.href = '/signin'
     }
     return Promise.reject(error)

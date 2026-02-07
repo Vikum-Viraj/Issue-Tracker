@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Hero from '../pages/Hero';
-import SignIn from '../components/Auth/SignIn';
-import SignUp from '../components/Auth/SignUp';
+import SignIn from '../components/auth/SignIn';
+import SignUp from '../components/auth/SignUp';
 import ProtectedRoute from '../components/route/ProtectedRoute';
 import PublicRoute from '../components/route/PublicRoute';
 import AllIssues from '../pages/AllIssues';

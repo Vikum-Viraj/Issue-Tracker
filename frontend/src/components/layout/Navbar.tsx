@@ -1,54 +1,15 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  token?: string;
-}
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { logout } from '../../store/authSlice'
+import { useAuth } from '../../hooks/useAuth'
 
 const Navbar = () => {
   const navigate = useNavigate()
-  const location = useLocation()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
-
-  const checkAuth = () => {
-    const token = sessionStorage.getItem('token')
-    const userData = sessionStorage.getItem('user')
-
-    if (token && userData) {
-      setIsAuthenticated(true)
-      setUser(JSON.parse(userData))
-    } else {
-      setIsAuthenticated(false)
-      setUser(null)
-    }
-  }
-
-  useEffect(() => {
-    checkAuth()
-
-    // listen for custom auth  events
-    window.addEventListener('authChange', checkAuth)
-
-    return () => {
-      window.removeEventListener('authChange', checkAuth)
-    }
-  }, [])
-
-  // Check auth on route changes
-  useEffect(() => {
-    checkAuth()
-  }, [location])
+  const dispatch = useDispatch()
+  const { user, isAuthenticated } = useAuth()
 
   const handleLogout = () => {
-    sessionStorage.removeItem('token')
-    sessionStorage.removeItem('user')
-    setIsAuthenticated(false)
-    setUser(null)
-    window.dispatchEvent(new Event('authChange'))
+    dispatch(logout())
     navigate('/signin')
   }
 
