@@ -140,7 +140,7 @@ export const getIssueById = async (req, res) => {
 // Get all issues for the logged-in user
 export const getUserIssues = async (req, res) => {
     try {
-        const userId = req.user.id; // From authMiddleware
+        const userId = req.user.id;
 
         const issues = await Issue.find({ user: userId }).sort({ createdAt: -1 });
 
@@ -164,7 +164,7 @@ export const getUserIssues = async (req, res) => {
 export const deleteIssue = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user.id; // From authMiddleware
+        const userId = req.user.id;
 
         // Check if issue exists
         const issue = await Issue.findById(id);

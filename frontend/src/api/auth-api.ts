@@ -55,12 +55,4 @@ export const authAPI = {
       }
     }
   },
-
-  // Logout user
-  logout: (): void => {
-    // Note: This method is now deprecated - use Redux logout action instead
-    // Keeping for backward compatibility, but components should use:
-    // const dispatch = useDispatch()
-    // dispatch(logout())
-  }
 }

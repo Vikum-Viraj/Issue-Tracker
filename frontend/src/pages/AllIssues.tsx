@@ -59,7 +59,7 @@ const AllIssues = () => {
     setLoading(false);
   };
 
-  // Filter issues based on search and filters - optimized with useMemo
+  // Filter issues based on search and filters
   const filteredIssues = useMemo(() => {
     return filterIssues(issues, debouncedSearchTerm, statusFilter, priorityFilter, severityFilter);
   }, [issues, debouncedSearchTerm, statusFilter, priorityFilter, severityFilter]);
@@ -83,7 +83,6 @@ const AllIssues = () => {
     setCurrentPage(1);
   }, [debouncedSearchTerm, statusFilter, priorityFilter, severityFilter]);
 
-  // Clear all filters
   const clearFilters = useCallback(() => {
     setSearchTerm('');
     setStatusFilter('All');

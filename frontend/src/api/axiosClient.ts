@@ -6,12 +6,13 @@ import { logout } from '../store/authSlice.ts'
 // create an axios client instance
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
-// Request interceptor to add token
+// axios interceptor to add token
 axiosClient.interceptors.request.use(
   (config) => {
     const token = getAuthToken()

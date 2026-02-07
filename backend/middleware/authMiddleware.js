@@ -15,7 +15,7 @@ export const authMiddleware = async (req, res, next) => {
         // Verify token
         const decoded = jwt.verify(
             token,
-            process.env.JWT_SECRET || "your_jwt_secret_key"
+            process.env.JWT_SECRET || "jwt_secret_key"
         );
 
         // Attach user info to request
