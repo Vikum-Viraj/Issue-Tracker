@@ -1,21 +1,8 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/((?!api|assets|_next|favicon.ico|.*\\..*).*)",
+      "source": "/((?!.*\\.).*)",
       "destination": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        }
-      ]
     }
   ]
 }
