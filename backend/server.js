@@ -9,20 +9,11 @@ dotenv.config()
 
 const app = express();
 
-// CORS configuration to allow frontend deployments
+// CORS configuration
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    // Allow localhost for development
-    if (origin.includes('localhost')) return callback(null, true);
-    
-    // Allow any vercel.app domain for production
+    // allow any vercel.app domain for production
     if (origin.endsWith('.vercel.app')) return callback(null, true);
-    
-    // Allow specific domains if needed
-    return callback(null, true); // Allow all for now
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
